@@ -33,7 +33,7 @@ class Nexus:
         #self.ts = load.timescale()
 
         try:
-            self.ser = serial.Serial("/dev/ttyGS0", baudrate=115200)
+            self.ser = serial.Serial("/dev/ttyGS0", baudrate=115200, write_timeout=1)
             time.sleep(0.1)
             self.ser.write(b":P#")
             time.sleep(0.1)
