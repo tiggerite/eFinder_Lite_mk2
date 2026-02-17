@@ -14,8 +14,8 @@ Requires:
 - A custom box (Raspberry Pi Zero, OLED display and switches)
 - A Nexus DSC Pro with optical encoders. (Note: requires Pro version)
 - USB cable from Nexus DSC Pro USB port to the Pi Zero USB OTG port.
-- A Camera, either the RP HQ Camera module (recommended) of an ASI Camera (Suggest ASI120MM-mini)
-- Camera lens, either 25 or 50mm. f1.8 or faster cctv lens. (Recommend Arducam 25mm f1.2)
+- A Camera,the RP HQ Camera module
+- Camera lens, (Recommend Arducam 25mm f1.2)
 
 Full details at [
 ](https://astrokeith.com/equipment/efinder/efinder-lite)https://astrokeith.com/equipment/efinder/efinder-lite
