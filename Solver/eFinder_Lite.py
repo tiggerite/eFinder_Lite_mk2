@@ -432,7 +432,6 @@ def setTilt():
         import adafruit_adxl34x
         i2c = board.I2C()
         tilt = adafruit_adxl34x.ADXL345(i2c)
-        side = 'auto'
     except:
         handpad.display("Flip set to auto","but no sensor","setting to 'right'")
         side = 'right'
