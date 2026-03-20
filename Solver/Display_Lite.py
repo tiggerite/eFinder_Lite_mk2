@@ -23,8 +23,8 @@ class Handpad:
                 i2c = board.I2C()
                 self.tilt = adafruit_adxl34x.ADXL345(i2c)
             except:
-                self.display("tilt set to auto","but no sensor","found")
-                sys.exit()
+                self.display("Flip set to auto","but no sensor","setting to 'right'")
+                self.side = 'right'
         libdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'drive')
         if os.path.exists(libdir):
             sys.path.append(libdir)
@@ -80,7 +80,7 @@ class Handpad:
         self.disp.ShowImage()
 
     def dispFocus(self, screen):
-       
+
         if self.findSide() < 0:
             screen = screen.transpose(Image.ROTATE_180)
 
