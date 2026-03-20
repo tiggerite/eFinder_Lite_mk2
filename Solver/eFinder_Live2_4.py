@@ -208,7 +208,7 @@ def solveImage(looping = False):
             )
         stars = str(len(centroids))
         if len(centroids) < 20:
-            handpad.display("Bad image","only"+ stars," centroids")
+            handpad.display("Bad image","only "+ stars," centroids")
             solve = False
             time.sleep(1)
             return
@@ -356,7 +356,7 @@ def go_solve():
 
 def solveLoop():
     global x, y, prev
-    disableButtonActions()
+    disableButtons()
     while True:
         capture()
         solveImage(True)
@@ -364,7 +364,6 @@ def solveLoop():
         stopButton = up if findTilt() > 0 else down
         if stopButton.is_pressed:
             x = y = 0
-            enableButtonActions()
             return
         if tilt is None:
             continue
@@ -427,15 +426,13 @@ def findTilt():
     else:
         return 1
 
-def disableButtonActions():
-    left.when_pressed = None
-    right.when_pressed = None
-    up.when_pressed = None
-    down.when_pressed = None
-    ok.when_pressed = None
+def disableButtons():
+    left.is_disabled = right.is_disabled = up.is_disabled = down.is_disabled = ok.is_disabled = True
 
 def doButton(button):
     global gotoFlag
+    if button.is_disabled:
+        return
     gotoFlag = True
     pin = str(button.pin)[4:]
     if pin == '26':
@@ -474,12 +471,8 @@ def doButton(button):
             exec(arr[x, y][6])
     gotoFlag = False
 
-def enableButtonActions():
-    left.when_pressed = doButton
-    right.when_pressed = doButton
-    up.when_pressed = doButton
-    down.when_pressed = doButton
-    ok.when_pressed = doButton
+def enableButtons():
+    left.is_disabled = right.is_disabled = up.is_disabled = down.is_disabled = ok.is_disabled = False
 
 def AdjBright(c):
     global param, arr
@@ -811,12 +804,18 @@ else:
 
 update_summary()
 
+Button.is_disabled = False
+
 up = Button(5, bounce_time=0.1)
 down = Button(6, bounce_time=0.1)
 left = Button(13, bounce_time=0.1)
 right = Button(19, bounce_time=0.1)
 ok = Button(26, bounce_time=0.1)
-enableButtonActions()
+left.when_pressed = doButton
+right.when_pressed = doButton
+up.when_pressed = doButton
+down.when_pressed = doButton
+ok.when_pressed = doButton
 
 wifiloop = Thread(target=serveWifi)
 wifiloop.start()
@@ -827,4 +826,5 @@ while True:
         sta = datetime.datetime.now(timezone.utc)
         stamp = sta.strftime("%d/%m/%y %H:%M:%S")
         handpad.display('eFinder Live','Ver: '+version,stamp)
+        enableButtons()
     time.sleep(0.2)

@@ -124,7 +124,7 @@ def solveImage():
             )
         stars = str(len(centroids))
         if len(centroids) < 30:
-            handpad.display("Bad image","only"+ stars," centroids")
+            handpad.display("Bad image","only "+ stars," centroids")
             solve = False
             time.sleep(3)
             return
