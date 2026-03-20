@@ -674,9 +674,9 @@ addr = socket.gethostbyname(hostname + '.local')
 
 locStr = ('Geo: %2.2f , %3.2f' % (geoloc.get_lat(),geoloc.get_long()))
 home = [
-    "Nexus live",
-    " RA:",
-    "Dec:",
+    "eFinder Live",
+    "",
+    "",
     "",
     "up_down(1)",
     "AdjBright(0)",
