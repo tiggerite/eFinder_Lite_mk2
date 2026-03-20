@@ -56,7 +56,6 @@ deltaAz = deltaAlt = 0
 expInc = 0.1 # sets how much exposure changes when using handpad adjust (seconds)
 gainInc = 5 # ditto for gain
 offset_flag = False
-looping = False
 solve = False
 gotoFlag = False
 dispBright = 241
@@ -194,7 +193,7 @@ def capture():
     )
 
 
-def solveImage():
+def solveImage(looping = False):
     global offset_flag, solve, solvedPos, elapsed_time, solved_radec, solved_altaz, firstStar, solution, cam, stars, go_to
 
     start_time = time.time()
@@ -310,8 +309,6 @@ def up_down(v):
 
 def left_right(v):
     global y
-    if looping:
-        return
     y = y + v
     time.sleep(0.2)
     handpad.display(arr[x, y][0], arr[x, y][1], arr[x, y][2])
@@ -358,16 +355,16 @@ def go_solve():
     handpad.display(arr[x, y][0], arr[x, y][1], arr[x, y][2])
 
 def solveLoop():
-    global looping, x, y, prev
-    looping = True
+    global x, y, prev
+    disableButtonActions()
     while True:
         capture()
-        solveImage()
+        solveImage(True)
         handpad.display(arr[x, y][0], arr[x, y][1], arr[x, y][2])
         stopButton = up if findTilt() > 0 else down
         if stopButton.is_pressed:
-            looping = False
             x = y = 0
+            enableButtonActions()
             return
         if tilt is None:
             continue
@@ -430,6 +427,13 @@ def findTilt():
     else:
         return 1
 
+def disableButtonActions():
+    left.when_pressed = None
+    right.when_pressed = None
+    up.when_pressed = None
+    down.when_pressed = None
+    ok.when_pressed = None
+
 def doButton(button):
     global gotoFlag
     gotoFlag = True
@@ -469,6 +473,13 @@ def doButton(button):
             time.sleep(0.05)
             exec(arr[x, y][6])
     gotoFlag = False
+
+def enableButtonActions():
+    left.when_pressed = doButton
+    right.when_pressed = doButton
+    up.when_pressed = doButton
+    down.when_pressed = doButton
+    ok.when_pressed = doButton
 
 def AdjBright(c):
     global param, arr
@@ -805,11 +816,7 @@ down = Button(6, bounce_time=0.1)
 left = Button(13, bounce_time=0.1)
 right = Button(19, bounce_time=0.1)
 ok = Button(26, bounce_time=0.1)
-left.when_pressed = doButton
-right.when_pressed = doButton
-up.when_pressed = doButton
-down.when_pressed = doButton
-ok.when_pressed = doButton
+enableButtonActions()
 
 wifiloop = Thread(target=serveWifi)
 wifiloop.start()
