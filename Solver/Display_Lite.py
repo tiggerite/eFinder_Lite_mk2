@@ -1,7 +1,6 @@
 import serial
 import os
 import sys
-from math import trunc
 from PIL import Image,ImageDraw,ImageFont
 
 
