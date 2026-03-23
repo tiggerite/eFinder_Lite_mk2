@@ -383,6 +383,7 @@ def solveLoop():
             prev = tilt.acceleration
             if not displayed:
                 displayAltAzSolve(solved_altaz, True)
+                displayed = True
             time.sleep(0.2)
             stopping = stopLoop()
         if stopping:
