@@ -76,7 +76,7 @@ except:
     pass
 
 def serveWifi(): # serve WiFi port
-    global gotoRa,gotoDec, go_to,doMove, dirMove, solved_radec, speed, goto_altaz, addr
+    global go_to, goto_altaz, addr
     print ('starting wifi server')
     host = ''
     port = 4060
@@ -131,7 +131,6 @@ def serveWifi(): # serve WiFi port
                             elif x[1] == 'Q':
                                 print('STOP!')
                                 go_to = False
-                                doMove = False
     except:
         pass
 
@@ -193,8 +192,23 @@ def capture():
     )
 
 
+def displayBadSolve(moving = ""):
+    if star_count < 20:
+        handpad.display("Bad image", "only " + str(star_count) + " centroids", moving)
+        return
+    handpad.display("Not Solved", str(star_count) + " centroids", moving)
+
+def getGotoDisplay(direction, distance):
+    dist = round(abs(distance), 2) if distance < 10 else round(abs(distance), 1)
+    distFmt = '%s %1.2f' if dist < 10 else '%s %2.1f' if dist < 100 else '%s %3d'
+    return (distFmt % (direction, dist if dist < 100 else math.trunc(dist)))
+
+def store_radec_display():
+    arr[0, 1][0] = "Sol: RA " + coordinates.hh2dms(solved_radec[0])
+    arr[0, 1][1] = "   Dec " + coordinates.dd2dms(solved_radec[1])
+
 def solveImage(looping = False):
-    global offset_flag, solve, solvedPos, elapsed_time, solved_radec, solved_altaz, firstStar, solution, cam, stars, go_to
+    global solve, solved_radec, firstStar, solution, star_count
 
     start_time = time.time()
     #handpad.display("Started solving", "", "")
@@ -206,11 +220,12 @@ def solveImage(looping = False):
             sigma=8,
             use_binned=False,
             )
-        stars = str(len(centroids))
-        if len(centroids) < 20:
-            handpad.display("Bad image","only "+ stars," centroids")
+        star_count = len(centroids)
+        if star_count < 20:
             solve = False
-            time.sleep(1)
+            if not looping:
+                displayBadSolve()
+                time.sleep(1)
             return
         solution = t3.solve_from_centroids(
                         centroids,
@@ -224,8 +239,9 @@ def solveImage(looping = False):
         elapsed_time = str(time.time() - start_time)[0:3]
 
     if solution['RA'] is None:
-        handpad.display("Not Solved",stars + " centroids", "")
         solve = False
+        if not looping:
+            displayBadSolve()
         return
     firstStar = centroids[0]
     ra = solution['RA_target']
@@ -239,35 +255,14 @@ def solveImage(looping = False):
 
     ra, dec, d = solvedPos.apparent().radec(coordinates.get_ts().now())
     solved_radec = ra.hours, dec.degrees
-    solved_altaz = conv_altaz(*(solved_radec))
-    if looping:
-        arr[0, 1][0] = "Sol: Az " + coordinates.ddd2dms(solved_altaz[1])
-        arr[0, 1][1] = "   Alt " + coordinates.dd2dms(solved_altaz[0])
-        if go_to:
-            ddAz = goto_altaz[1] - solved_altaz[1]
-            if ddAz > 180:
-                ddAz = (ddAz - 180) * -1
-            elif ddAz < -180:
-                ddAz = (ddAz +180) * -1
-            ddAlt = goto_altaz[0] - solved_altaz[0]
-            if ddAz < 0:
-                sAz = 'L'
-            else:
-                sAz = 'R'
-            if ddAlt < 0:
-                sAlt = 'Dn'
-            else:
-                sAlt = 'Up'
-            dAz = ('%s %3.2f' % (sAz,abs(ddAz)))
-            dAlt = ('%s %2.2f' % (sAlt, abs(ddAlt)))
-            arr[0, 1][2] = dAz + '   ' + dAlt
-        else:
-            arr[0, 1][2] = stars + " stars in " + elapsed_time + " s"
-    else:
-        arr[0, 1][0] = "Sol: RA " + coordinates.hh2dms(solved_radec[0])
-        arr[0, 1][1] = "   Dec " + coordinates.dd2dms(solved_radec[1])
-        arr[0, 1][2] = stars + " stars in " + elapsed_time + " s"
     solve = True
+
+    arr[0, 1][2] = str(star_count) + " stars in " + elapsed_time + " s"
+    if not looping:
+        store_radec_display()
+        return
+
+    return conv_altaz(*(solved_radec))
 
 def measure_offset():
     global offset_str, offset_flag, offset, param, scope_x, scope_y, firstStar
@@ -354,23 +349,51 @@ def go_solve():
     y = 1
     handpad.display(arr[x, y][0], arr[x, y][1], arr[x, y][2])
 
+def displayAltAzSolve(solved_altaz, scopeMoving = False):
+    if not solve:
+        displayBadSolve("Scope moving" if scopeMoving else "")
+        return
+    dispAz = coordinates.ddd2dms(solved_altaz[1])
+    dispAlt = coordinates.dd2dms(solved_altaz[0])
+    line2 = "Scope moving" if scopeMoving else arr[0, 1][2]
+    if go_to:
+        ddAz = goto_altaz[1] - solved_altaz[1]
+        ddAlt = goto_altaz[0] - solved_altaz[0]
+        handpad.dispGoto(ddAz, ddAlt, dispAz, dispAlt, line2)
+    else:
+        handpad.display("Sol: Az " + dispAz, "      Alt " + dispAlt, line2)
+
+def scopeMoving():
+    if tilt is None:
+        return False
+    return abs(tilt.acceleration[0] - prev[0]) > threshold or abs(tilt.acceleration[1] - prev[1]) > threshold or abs(tilt.acceleration[2] - prev[2]) > threshold
+
 def solveLoop():
     global x, y, prev
     disableButtons()
-    while True:
+    if tilt is not None:
+        prev = tilt.acceleration
+    stopping = False
+    while not stopping:
         capture()
-        solveImage(True)
-        handpad.display(arr[x, y][0], arr[x, y][1], arr[x, y][2])
-        stopButton = up if findTilt() > 0 else down
-        if stopButton.is_pressed:
-            x = y = 0
-            return
-        if tilt is None:
-            continue
-        while abs(tilt.acceleration[0] - prev[0]) > threshold or abs(tilt.acceleration[1] - prev[1]) > threshold or abs(tilt.acceleration[2] - prev[2]) > threshold:
-            handpad.display(arr[x, y][0], arr[x, y][1], "Scope moving")
-            time.sleep(0.2)
+        solved_altaz = solveImage(True)
+        stopping = stopLoop()
+        displayed = False
+        while not stopping and scopeMoving():
             prev = tilt.acceleration
+            if not displayed:
+                displayAltAzSolve(solved_altaz, True)
+            time.sleep(0.2)
+            stopping = stopLoop()
+        if stopping:
+            store_radec_display()
+        displayAltAzSolve(solved_altaz)
+    x = y = 0
+    return
+
+def stopLoop():
+    stopButton = up if findTilt() > 0 else down
+    return stopButton.is_pressed
 
 def reset_offset():
     global param, arr, offset
@@ -591,7 +614,7 @@ def loopFocus(auto):
         imp = imp.resize((64,64),Image.LANCZOS)
         imp = ImageEnhance.Contrast(imp).enhance(5)
         img.paste(imp,box=(1,1))
-        img.save('/home/efinder/Solver/images/image.png')
+        img.save(home_path + '/Solver/images/image.png')
 
     handpad.dispFocus(screen)
 
