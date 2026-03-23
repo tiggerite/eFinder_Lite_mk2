@@ -108,9 +108,9 @@ class Handpad:
         else:
             self.draw.regular_polygon((90, 3, 4), 3, rotation=90, fill=255)
         if ddAlt < 0:
-            self.draw.regular_polygon((89, 13, 4), 3, rotation=180, fill=255)
+            self.draw.regular_polygon((89, 12, 4), 3, rotation=180, fill=255)
         else:
-            self.draw.regular_polygon((89, 13, 4), 3, fill=255)
+            self.draw.regular_polygon((89, 14, 4), 3, fill=255)
 
         self.draw.text((98, 0), getDistanceDisplay(ddAz), font=self.font, fill=255)
         self.draw.text((98, 10), getDistanceDisplay(ddAlt), font=self.font, fill=255)
