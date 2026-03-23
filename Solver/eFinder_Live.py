@@ -192,11 +192,11 @@ def capture():
     )
 
 
-def displayBadSolve(moving = ""):
+def displayBadSolve(line2 = ""):
     if star_count < 20:
-        handpad.display("Bad image", "only " + str(star_count) + " centroids", moving)
+        handpad.display("Bad image", "only " + str(star_count) + " centroids", line2)
         return
-    handpad.display("Not Solved", str(star_count) + " centroids", moving)
+    handpad.display("Not Solved", str(star_count) + " centroids", line2)
 
 def getGotoDisplay(direction, distance):
     dist = round(abs(distance), 2) if distance < 10 else round(abs(distance), 1)
@@ -349,13 +349,13 @@ def go_solve():
     y = 1
     handpad.display(arr[x, y][0], arr[x, y][1], arr[x, y][2])
 
-def displayAltAzSolve(solved_altaz, scopeMoving = False):
+def displayAltAzSolve(solved_altaz, moving = False):
     if not solve:
-        displayBadSolve("Scope moving" if scopeMoving else "")
+        displayBadSolve("Scope moving" if moving else "")
         return
     dispAz = coordinates.ddd2dms(solved_altaz[1])
     dispAlt = coordinates.dd2dms(solved_altaz[0])
-    line2 = "Scope moving" if scopeMoving else arr[0, 1][2]
+    line2 = "Scope moving" if moving else arr[0, 1][2]
     if go_to:
         ddAz = goto_altaz[1] - solved_altaz[1]
         ddAlt = goto_altaz[0] - solved_altaz[0]
