@@ -110,7 +110,7 @@ def capture():
 
 
 def solveImage():
-    global offset_flag, solve, solvedPos, elapsed_time, solved_radec, solved_altaz, firstStar, solution, cam, stars
+    global solve, solved_radec, firstStar, solution
 
     start_time = time.time()
     handpad.display("Started solving", "", "")
@@ -155,7 +155,6 @@ def solveImage():
 
     ra, dec, d = solvedPos.apparent().radec(coordinates.get_ts().now())
     solved_radec = ra.hours, dec.degrees
-    solved_altaz = coordinates.conv_altaz(nexus, *(solved_radec))
     arr[0, 1][0] = "Sol: RA " + coordinates.hh2dms(solved_radec[0])
     arr[0, 1][1] = "   Dec " + coordinates.dd2dms(solved_radec[1])
     arr[0, 1][2] = stars + " stars in " + elapsed_time + " s"
