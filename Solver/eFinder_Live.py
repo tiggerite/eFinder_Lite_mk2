@@ -198,11 +198,6 @@ def displayBadSolve(line2 = ""):
         return
     handpad.display("Not Solved", str(star_count) + " centroids", line2)
 
-def getGotoDisplay(direction, distance):
-    dist = round(abs(distance), 2) if distance < 10 else round(abs(distance), 1)
-    distFmt = '%s %1.2f' if dist < 10 else '%s %2.1f' if dist < 100 else '%s %3d'
-    return (distFmt % (direction, dist if dist < 100 else math.trunc(dist)))
-
 def store_radec_display():
     arr[0, 1][0] = "Sol: RA " + coordinates.hh2dms(solved_radec[0])
     arr[0, 1][1] = "   Dec " + coordinates.dd2dms(solved_radec[1])
