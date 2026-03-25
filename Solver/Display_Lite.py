@@ -90,13 +90,13 @@ class Handpad:
 
     def dispGoto(self, ddAz, ddAlt, dispAz, dispAlt, line2):
         def getDistanceDisplay(dd):
-            dist = round(abs(dd), 3) if dd < 10 else round(abs(dd), 2) if dd < 100 else round(abs(dd), 1)
-            distFmt = '%1.3f' if dist < 10 else '%2.2f' if dist < 100 else '%3.1f'
+            dist = round(dd, 3) if dd < 0.01 else round(dd, 2) if dd < 10 else round(dd, 1)
+            distFmt = '%1.3f' if dist < 0.01 else '%2.2f' if dist < 10 else '%3.1f'
             return (distFmt % dist)
 
         self.draw.rectangle((0,0,self.width,self.height), outline=0, fill=0)
-        self.draw.text((1, 0), " Az " + dispAz, font=self.font, fill=255)
-        self.draw.text((1, 10), "Alt " + dispAlt, font=self.font, fill=255)
+        self.draw.text((51, 0), "Az " + dispAz, font=self.font, fill=255)
+        self.draw.text((47, 10), "Alt " + dispAlt, font=self.font, fill=255)
 
         if ddAz > 180:
             ddAz = (ddAz - 180) * -1
@@ -104,16 +104,20 @@ class Handpad:
             ddAz = (ddAz + 180) * -1
 
         if ddAz < 0:
-            self.draw.regular_polygon((88, 3, 4), 3, rotation=270, fill=255)
+            self.draw.polygon([(3, 1),(1, 3),(3, 5)], fill=255)
+            self.draw.line([(7, 3),(4, 3)], fill=255)
         else:
-            self.draw.regular_polygon((90, 3, 4), 3, rotation=90, fill=255)
+            self.draw.polygon([(5, 1),(7, 3),(5, 5)], fill=255)
+            self.draw.line([(1, 3),(4, 3)], fill=255)
         if ddAlt < 0:
-            self.draw.regular_polygon((89, 12, 4), 3, rotation=180, fill=255)
+            self.draw.polygon([(2, 14),(4, 16),(6, 14)], fill=255)
+            self.draw.line([(4, 10),(4, 13)], fill=255)
         else:
-            self.draw.regular_polygon((89, 14, 4), 3, fill=255)
+            self.draw.polygon([(2, 12),(4, 10),(6, 12)], fill=255)
+            self.draw.line([(4, 16),(4, 13)], fill=255)
 
-        self.draw.text((98, 0), getDistanceDisplay(ddAz), font=self.font, fill=255)
-        self.draw.text((98, 10), getDistanceDisplay(ddAlt), font=self.font, fill=255)
+        self.draw.text((10, 0), getDistanceDisplay(abs(ddAz)), font=self.font, fill=255)
+        self.draw.text((10, 10), getDistanceDisplay(abs(ddAlt)), font=self.font, fill=255)
         self.draw.text((1, 20), line2, font=self.font, fill=255)
 
         if self.findSide() < 0:
