@@ -626,8 +626,9 @@ def saveImage():
     handpad.display(arr[x, y][0], arr[x, y][1], "image saved")
 
 def setWifi():
-    global arr, hotspot
+    global hotspot
     hotspot = not hotspot
+    disableButtons()
     if hotspot:
         handpad.display('Setting up','Wifi Hotspot','please wait')
         os.system("sudo nmcli device wifi hotspot ssid 'efinder' password 'efinder1'")
@@ -638,12 +639,12 @@ def setWifi():
         os.system('sudo nmcli device disconnect wlan0')
         os.system('sudo nmcli connection up preconfigured')
         handpad.display('Connecting to','Preconfigured wifi','please wait')
-        time.sleep(5)
         hostname = socket.gethostname()
         addr = socket.gethostbyname(hostname + '.local')
         arr[2,0][0] = hostname
         arr[2,0][1] = 'IP:'+addr
         handpad.display(arr[x, y][0], arr[x, y][1], arr[x,y][2])
+    enableButtons()
 # main code starts here
 
 coordinates = Coordinates_Lite.Coordinates()
